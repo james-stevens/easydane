@@ -1,0 +1,20 @@
+#
+# Fill out these fields
+#
+# where
+#
+# C = Country
+# ST = State, Province or County
+# L = Location, City or Office
+# O = Organization Name
+# OU = Organizational Unit Name
+#
+# server_name = full name of your website / server (e.g "www.domain.txt")
+
+C=""
+ST=""
+L=""
+O=""
+OU=""
+
+server_name=""

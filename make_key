@@ -1,0 +1,81 @@
+#! /bin/sh
+
+error_exit()
+{
+	echo "ERROR: ${1}"
+	cd ${here} ; rm -rf ${tmp}
+	exit 0
+}
+
+here="${pwd}"
+
+. ./config
+
+conf="${here}/host.conf"
+
+tmp=$(mktemp -d)
+cd ${tmp}
+
+ret=$(param)
+if test -z "${ret}" -a "$1"; then ret="$*"; fi
+
+fqdn="${server_name}"
+
+if test -z "${days}"; then days=7305; fi
+if test -z "${ca_bits}"; then ca_bits=2048; fi
+if test -z "${key_bits}"; then key_bits=2048; fi
+
+export ENV_C="${C}"
+export ENV_ST="${ST}"
+export ENV_L="${L}"
+export ENV_O="${O}"
+export ENV_OU="${OU}"
+export ENV_FQDN="${fqdn}"
+
+if test -z "${ENV_C}" -o -z "${ENV_ST}" -o -z "${ENV_L}" \
+		-o -z "${ENV_O}" -o -z "${ENV_OU}" -o -z "${ENV_FQDN}"
+	then
+		error_exit "Missing paramater check the 'config' file"
+	fi
+
+echo "[ v3_req ]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = ${fqdn}
+" > host.v3
+
+{
+openssl genrsa -out my_ca.key "${ca_bits}"
+openssl req -x509 -new -nodes -key my_ca.key -sha256 -days "${days}" -out my_ca.pem -config ${conf}
+
+openssl genrsa -out host.key "${key_bits}"
+openssl req -new -key host.key -sha256 -nodes -config ${conf} -out host.csr -extensions v3_req
+openssl x509 -req -in host.csr -CA my_ca.pem -CAkey my_ca.key -CAcreateserial -out host.crt -days "${days}" -sha256 -extensions v3_req -extfile host.v3
+
+} >/dev/null 2>&1
+
+
+if ! test -f host.crt -a my_ca.pem -a host.crt -a host.key -a my_ca.key
+	then
+		error_exit "Keys failed to generate"
+	fi
+
+
+cd -
+
+cat ${tmp}/host.crt ${tmp}/host.key > certkey.pem
+
+{
+echo "# Put one of these in your DNS zone file"
+echo ""
+echo "# SHA512 - Recommended"
+ldns-dane -c ${tmp}/host.crt -f ${tmp}/my_ca.pem create "${fqdn}" 443 3 1 2
+echo "# SHA256 - Still OK"
+ldns-dane -c ${tmp}/host.crt -f ${tmp}/my_ca.pem create "${fqdn}" 443 3 1 1
+} > dns_tlsa.txt
+
+cd ${here}
+rm -rf ${tmp}
+
+exit 0
