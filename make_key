@@ -2,14 +2,18 @@
 
 error_exit()
 {
+	echo ""
+	echo "==================================="
 	echo "ERROR: ${1}"
+	echo "==================================="
 	cd ${here} ; rm -rf ${tmp}
 	exit 0
 }
 
-here="${pwd}"
+here="$(pwd)"
 
 . ./config
+if test "$1" -a -f "./${1}"; then . ./${1}; fi
 
 conf="${here}/host.conf"
 
@@ -45,7 +49,6 @@ subjectAltName = @alt_names
 DNS.1 = ${fqdn}
 " > host.v3
 
-{
 openssl genrsa -out my_ca.key "${ca_bits}"
 openssl req -x509 -new -nodes -key my_ca.key -sha256 -days "${days}" -out my_ca.pem -config ${conf}
 
@@ -53,7 +56,6 @@ openssl genrsa -out host.key "${key_bits}"
 openssl req -new -key host.key -sha256 -nodes -config ${conf} -out host.csr -extensions v3_req
 openssl x509 -req -in host.csr -CA my_ca.pem -CAkey my_ca.key -CAcreateserial -out host.crt -days "${days}" -sha256 -extensions v3_req -extfile host.v3
 
-} >/dev/null 2>&1
 
 
 if ! test -f host.crt -a my_ca.pem -a host.crt -a host.key -a my_ca.key
@@ -62,9 +64,9 @@ if ! test -f host.crt -a my_ca.pem -a host.crt -a host.key -a my_ca.key
 	fi
 
 
-cd -
+cd ${here}
 
-cat ${tmp}/host.crt ${tmp}/host.key > certkey.pem
+cat ${tmp}/host.crt ${tmp}/host.key > ${fqdn}.pem
 
 {
 echo "# Put one of these in your DNS zone file"
@@ -73,9 +75,17 @@ echo "# SHA512 - Recommended"
 ldns-dane -c ${tmp}/host.crt -f ${tmp}/my_ca.pem create "${fqdn}" 443 3 1 2
 echo "# SHA256 - Still OK"
 ldns-dane -c ${tmp}/host.crt -f ${tmp}/my_ca.pem create "${fqdn}" 443 3 1 1
-} > dns_tlsa.txt
+} > ${fqdn}_tlsa.txt
 
-cd ${here}
+
+echo ""
+echo ""
+echo ""
+
+ls -l ${fqdn}.pem ${fqdn}_tlsa.txt
+
+echo ""
+
 rm -rf ${tmp}
 
 exit 0
