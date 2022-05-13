@@ -12,9 +12,9 @@
 # server_name = full name of your website / server (e.g "www.domain.txt")
 
 C="GB"
-ST="Berks"
-L="Windsor"
-O="JRCS Ltd"
-OU="R-and-D"
+ST="London"
+L="South East"
+O="Company Ltd"
+OU="Operations"
 
-server_name="sane.txt"
+server_name="insane.txt"

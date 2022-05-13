@@ -6,11 +6,23 @@ error_exit()
 	echo "==================================="
 	echo "ERROR: ${1}"
 	echo "==================================="
-	cd ${here} ; rm -rf ${tmp}
+	cd ${here}
+	if test "${tmp}"; then rm -rf ${tmp}; fi
 	exit 0
 }
 
 here="$(pwd)"
+
+if ! test "$(which openssl)"
+	then
+		error_exit "OpenSSL is not installed"
+	fi
+
+if ! test "$(which ldns-dane)"
+	then
+		error_exit "ldns or ldns-tools is not installed"
+	fi
+
 
 . ./config
 if test "$1" -a -f "./${1}"; then . ./${1}; fi
