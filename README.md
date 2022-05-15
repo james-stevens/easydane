@@ -1,4 +1,4 @@
-To get a PEM & TLSA DNS record that will work for DANE SSL/TLS, so the following
+To get a PEM & TLSA DNS record that will work for DANE SSL/TLS, do the following
 
 - Edit the file `config` and put in the values you want (see `config.example`)
 - run `make_key`
