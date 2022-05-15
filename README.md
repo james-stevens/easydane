@@ -1,7 +1,7 @@
 To get a PEM & TLSA DNS record that will work for DANE SSL/TLS, do the following
 
 - Edit the file `config` and put in the values you want (see `config.example`)
-- run `make_key`
+- run `./make_key`
 
 This will give you two files - a PEM & a TXT of the DNS TLSA records. They will be prefixed by the host name
 
@@ -13,4 +13,10 @@ e.g for `nginx`
         ssl_certificate_key /etc/nginx/ca/dane.txt.pem;
 
 
-If you want to keep multiple copies of different `config` files, you can give them different names, then run `make_key <config-file>`
+If you want to keep multiple copies of different `config` files, you can give them different names, then run
+
+        ./make_key <config-file>
+
+You can try out the exmaple, if you wish - but it will only be useful if you happen to own the domain name `exmaple.txt`
+
+        ./make_key config.exmaple
