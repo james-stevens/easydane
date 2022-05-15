@@ -17,6 +17,6 @@ If you want to keep multiple copies of different `config` files, you can give th
 
         ./make_key <config-file>
 
-You can try out the exmaple, if you wish - but it will only be useful if you happen to own the domain name `exmaple.txt`
+You can try out the example, if you wish - but it will only be useful if you happen to own the domain name `example.txt`
 
-        ./make_key config.exmaple
+        ./make_key config.example
